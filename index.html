@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Scoring Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f8fbff;
+      --panel: #ffffff;
+      --line: #e5ecf5;
+      --text: #1f2937;
+      --muted: #667085;
+      --title: #344054;
+      --lavender: #ddd8ff;
+      --lavender-deep: #887cf7;
+      --blue: #cde8ff;
+      --blue-deep: #6fb6ff;
+      --mint: #d8f4ea;
+      --mint-deep: #6ec7a9;
+      --sand: #fde8c8;
+      --sand-deep: #dfb06d;
+      --slate-soft: #edf2f7;
+      --slate-deep: #79859a;
+      --risk: #9f1239;
+      --risk-soft: #fdf2f5;
+      --radius: 16px;
+      --shadow: 0 1px 2px rgba(16,24,40,.04), 0 10px 24px rgba(16,24,40,.05);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body, input, select, button, table, th, td, canvas, .chartjs-tooltip {
+      font-family: var(--font);
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #fcfdff 0%, #f7fbff 100%);
+      color: var(--text);
+    }
+    .shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #ffffff 0%, #fdfeff 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      display: block;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: #1f2937;
+    }
+    .hero p {
+      margin: 8px 0 0;
+      max-width: 860px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .guide {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .guide span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+    .guide .ok { color: #4e9377; }
+    .guide .watch { color: #b8843c; }
+    .guide .risk { color: var(--risk); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--title);
+      line-height: 1.3;
+    }
+    .card-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .card-body { padding: 18px; }
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+    .kpi {
+      position: relative;
+      min-height: 120px;
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #feffff 100%);
+    }
+    .kpi::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--lavender-deep);
+    }
+    .kpi.blue-top::before { background: var(--blue-deep); }
+    .kpi.mint-top::before { background: var(--mint-deep); }
+    .kpi.sand-top::before { background: var(--sand-deep); }
+    .kpi.risk-top::before { background: var(--risk); }
+    .kpi-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .kpi-value {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1;
+    }
+    .kpi-foot {
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    input, select {
+      min-width: 220px;
+      border: 1px solid #d6e0eb;
+      background: #fff;
+      color: var(--title);
+      font-size: 13px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #cecaff;
+      box-shadow: 0 0 0 4px rgba(136,124,247,.08);
+    }
+    .score-table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    thead tr {
+      background: #62708a;
+      color: #fff;
+    }
+    th, td {
+      padding: 14px;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--line);
+    }
+    tbody tr:hover { background: #fbfdff; }
+    .vendor-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .accent {
+      width: 7px;
+      height: 44px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+    .accent.g { background: var(--mint-deep); }
+    .accent.a { background: var(--sand-deep); }
+    .accent.r { background: var(--risk); }
+    .vendor-name {
+      font-weight: 700;
+      color: #111827;
+    }
+    .vendor-meta {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .score-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 200px;
+    }
+    .progress {
+      width: 128px;
+      height: 10px;
+      border-radius: 999px;
+      background: #ecf0f5;
+      overflow: hidden;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .badge.green { background: #f4fcf8; color: #4e9377; border-color: #d8efe5; }
+    .badge.amber { background: #fff8ef; color: #b8843c; border-color: #f7e4c7; }
+    .badge.red { background: var(--risk-soft); color: var(--risk); border-color: #f3ccd7; }
+    .mini-list {
+      display: grid;
+      gap: 14px;
+    }
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr 70px;
+      gap: 14px;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .mini-name {
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--title);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #edf2f7;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #cde8ff 0%, #8b83f6 100%);
+    }
+    .mini-value {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475467;
+    }
+    .action-list {
+      display: grid;
+      gap: 12px;
+    }
+    .action-item {
+      background: #fcfcfd;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .action-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .action-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--title);
+    }
+    .action-text {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .summary-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .summary-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .summary-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .summary-note {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .ppm-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      background: #ffffff;
+      color: #475467;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(16,24,40,.08);
+      padding: 10px 12px;
+      min-width: 180px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .ppm-tooltip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ppm-tooltip .tt-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #344054;
+      margin-bottom: 6px;
+    }
+    .ppm-tooltip .tt-body {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #475467;
+    }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+    .short canvas { height: 240px !important; }
+    @media (max-width: 1240px) {
+      .span-8, .span-4, .span-3 { grid-column: span 12; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .shell { padding: 14px; }
+      .hero { padding: 18px; }
+      .kpi-value, .summary-value { font-size: 26px; }
+      input, select { min-width: unset; width: 100%; }
+      .toolbar { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <h1>Vendor Scoring Dashboard</h1>
+        <p>
+          Executive-to-operations view for vendor governance, designed around scorecarding. It highlights vendor quality,
+          service reliability, compliance readiness, and where intervention is needed for Integrity Solutions accounts.
+        </p>
+        <div class="guide">
+          <span><strong class="ok">Healthy</strong> 80–100</span>
+          <span><strong class="watch">Watchlist</strong> 60–79</span>
+          <span><strong class="risk">Risk</strong> below 60</span>
+          <span>Weights: Same-Day 40% • Resolution 35% • PM Adherence 25%</span>
+        </div>
+      </div>
+      </section>
+
+    <section class="grid" style="margin-bottom:18px;">
+      <div class="card span-3"><div class="kpi"><div class="kpi-label">Active Vendors</div><div class="kpi-value" id="kpiVendors">6</div><div class="kpi-foot">Total vendors currently included in performance governance and score evaluation.</div></div></div>
+      <div class="card span-3"><div class="kpi blue-top"><div class="kpi-label">Average Score</div><div class="kpi-value" id="kpiAvg">76%</div><div class="kpi-foot">Average weighted score across all visible vendors in the current portfolio.</div></div></div>
+      <div class="card span-3"><div class="kpi risk-top"><div class="kpi-label">High Risk Vendors</div><div class="kpi-value" id="kpiRisk">2</div><div class="kpi-foot">Count of vendors currently flagged for intervention based on score and risk band.</div></div></div>
+      <div class="card span-3"><div class="kpi mint-top"><div class="kpi-label">Insurance Complete</div><div class="kpi-value" id="kpiInsurance">3/6</div><div class="kpi-foot">Vendors with insurance documentation completed and ready for compliance review.</div></div></div>
+    </section>
+
+    <section class="grid" style="margin-bottom:18px;">
+      <div class="card span-8">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Vendor Score Ranking</div>
+            <div class="card-sub">Ranks vendors by final score and compares them against the target performance threshold.</div>
+          </div>
+        </div>
+        <div class="card-body"><canvas id="benchmarkChart"></canvas></div>
+      </div>
+      <div class="card span-4 short">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Portfolio Quality Split</div>
+            <div class="card-sub">Shows how the vendor base is split across healthy, watchlist, and risk categories.</div>
+          </div>
+        </div>
+        <div class="card-body"><canvas id="distributionChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="grid" style="margin-bottom:18px;">
+      <div class="card span-12">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Vendor Scorecard</div>
+            <div class="card-sub">Detailed scorecard with KPI-level performance and the final weighted vendor score.</div>
+          </div>
+          <div class="toolbar">
+            <input id="searchInput" type="text" placeholder="Search vendor / contact / email" />
+            <select id="riskFilter">
+              <option value="all">All Risk Levels</option>
+              <option value="Low">Low Risk</option>
+              <option value="Medium">Medium Risk</option>
+              <option value="High">High Risk</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body score-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Vendor</th>
+                <th>First Time Fix</th>
+                <th>Same Day Completion</th>
+                <th>Request Resolution</th>
+                <th>PM Adherence</th>
+                <th>Final Score</th>
+              </tr>
+            </thead>
+            <tbody id="scoreTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" style="margin-bottom:18px;">
+      <div class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">PM Adherence Ranking</div>
+            <div class="card-sub">Highlights how consistently vendors complete preventive maintenance on schedule.</div>
+          </div>
+        </div>
+        <div class="card-body"><div id="ppmList" class="mini-list"></div></div>
+      </div>
+      <div class="card span-4 short">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Contract Exposure Mix</div>
+            <div class="card-sub">Breaks down contract value by service category to show commercial concentration.</div>
+          </div>
+        </div>
+        <div class="card-body"><canvas id="contractChart"></canvas></div>
+      </div>
+      <div class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Priority Actions</div>
+            <div class="card-sub">Recommended next steps for the vendors that require the most immediate attention.</div>
+          </div>
+        </div>
+        <div class="card-body"><div id="actionList" class="action-list"></div></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card span-12">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Portfolio Summary</div>
+            <div class="card-sub">High-level summary of the current vendor base across performance and compliance.</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="summary-grid">
+            <div class="summary-box">
+              <div class="summary-label">Preferred Vendors</div>
+              <div class="summary-value" id="preferredCount">2</div>
+              <div class="summary-note">High-score vendors suitable for premium or sensitive accounts.</div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-label">Watchlist Vendors</div>
+              <div class="summary-value" id="watchCount">2</div>
+              <div class="summary-note">Medium performers requiring routine performance governance.</div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-label">Compliance Gaps</div>
+              <div class="summary-value" id="gapCount">3</div>
+              <div class="summary-note">Vendors with missing insurance or documentation readiness.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const vendors = [
+      { id: '#109583', name: 'FSM Service Solutions', primaryContact: 'Mark', email: 'riyavarshini.arunprasad+fsmvend@facilio.com', insuranceUploaded: 'No', category: 'General Maintenance', firstTimeFix: 78, sameDayFixes: 81, requestResolution: 84, pmAdherence: 79, finalScore: 82, risk: 'Medium', contractCost: 125000, action: 'Close documentation gaps and tighten preventive maintenance follow-up.' },
+      { id: '#109582', name: 'Optimus Prime', primaryContact: 'PREM+FSM', email: 'premkumar+mtfsm@facilio.com', insuranceUploaded: 'No', category: 'Electrical Services', firstTimeFix: 72, sameDayFixes: 74, requestResolution: 78, pmAdherence: 71, finalScore: 76, risk: 'Medium', contractCost: 98000, action: 'Improve same-day completion through dispatch and response planning.' },
+      { id: '#109577', name: 'PrimeClean Facility Experts', primaryContact: 'Naveen s', email: 'naveen.s+vendor@moolya.com', insuranceUploaded: 'No', category: 'Cleaning Services', firstTimeFix: 82, sameDayFixes: 86, requestResolution: 87, pmAdherence: 80, finalScore: 85, risk: 'Low', contractCost: 146000, action: 'Use as a benchmark vendor for service quality and consistency.' },
+      { id: '#109576', name: 'Fix Cleaning Co', primaryContact: 'Fix Cleaning Co', email: 'akhila+fsmdemo@facilio.com', insuranceUploaded: 'Yes', category: 'Janitorial Services', firstTimeFix: 89, sameDayFixes: 92, requestResolution: 90, pmAdherence: 93, finalScore: 91, risk: 'Low', contractCost: 173000, action: 'Use as a preferred vendor for high-visibility and premium sites.' },
+      { id: '#109590', name: 'Summit Facility Partners', primaryContact: 'Daniel Brooks', email: 'daniel.brooks@summitfacilitypartners.com', insuranceUploaded: 'Yes', category: 'HVAC & Mechanical', firstTimeFix: 60, sameDayFixes: 66, requestResolution: 69, pmAdherence: 64, finalScore: 67, risk: 'High', contractCost: 118000, action: 'Initiate weekly performance governance and escalation tracking.' },
+      { id: '#109591', name: 'BluePeak Maintenance Group', primaryContact: 'Sarah Collins', email: 'sarah.collins@bluepeakmg.com', insuranceUploaded: 'Yes', category: 'Reactive Works', firstTimeFix: 52, sameDayFixes: 57, requestResolution: 61, pmAdherence: 56, finalScore: 58, risk: 'High', contractCost: 86000, action: 'Evaluate probation status or replacement for critical-service locations.' }
+    ];
+
+    let chartRefs = [];
+
+    const centerTextPlugin = {
+      id: 'centerTextPlugin',
+      afterDraw(chart, args, pluginOptions) {
+        if (!pluginOptions || !pluginOptions.text) return;
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+        const x = (chartArea.left + chartArea.right) / 2;
+        const y = (chartArea.top + chartArea.bottom) / 2;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#344054';
+        ctx.font = '700 22px Inter, system-ui, sans-serif';
+        ctx.fillText(pluginOptions.text, x, y - 4);
+        ctx.fillStyle = '#667085';
+        ctx.font = '500 11px Inter, system-ui, sans-serif';
+        ctx.fillText(pluginOptions.subtext || '', x, y + 14);
+        ctx.restore();
+      }
+    };
+
+    Chart.register(centerTextPlugin);
+
+    function band(score) {
+      if (score >= 80) return 'green';
+      if (score >= 60) return 'amber';
+      return 'red';
+    }
+
+    function barColor(score) {
+      if (score >= 80) return '#6ec7a9';
+      if (score >= 60) return '#dfb06d';
+      return '#9f1239';
+    }
+
+    function getFiltered() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const risk = document.getElementById('riskFilter').value;
+      return vendors.filter(v => {
+        const haystack = `${v.name} ${v.primaryContact} ${v.email}`.toLowerCase();
+        return haystack.includes(search) && (risk === 'all' || v.risk === risk);
+      });
+    }
+
+    function average(list, key) {
+      return Math.round(list.reduce((sum, item) => sum + item[key], 0) / (list.length || 1));
+    }
+
+    function baseTooltip(tooltipItemList) {
+      return {
+        backgroundColor: '#ffffff',
+        titleColor: '#344054',
+        bodyColor: '#475467',
+        borderColor: '#e5ecf5',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: true,
+        titleFont: { family: 'Inter', weight: '700', size: 12 },
+        bodyFont: { family: 'Inter', size: 12 },
+        footerFont: { family: 'Inter', size: 11 },
+        callbacks: {
+          title(items) {
+            const index = items[0].dataIndex;
+            return tooltipItemList[index].name || items[0].label;
+          }
+        }
+      };
+    }
+
+    function renderKPIs(data) {
+      document.getElementById('kpiVendors').textContent = data.length;
+      document.getElementById('kpiAvg').textContent = average(data, 'finalScore') + '%';
+      document.getElementById('kpiRisk').textContent = data.filter(v => v.risk === 'High').length;
+      document.getElementById('kpiInsurance').textContent = `${data.filter(v => v.insuranceUploaded === 'Yes').length}/${data.length}`;
+      document.getElementById('preferredCount').textContent = data.filter(v => v.finalScore >= 85).length;
+      document.getElementById('watchCount').textContent = data.filter(v => v.risk === 'Medium').length;
+      document.getElementById('gapCount').textContent = data.filter(v => v.insuranceUploaded === 'No').length;
+    }
+
+    function renderTable(data) {
+      const body = document.getElementById('scoreTableBody');
+      body.innerHTML = '';
+      data.forEach(v => {
+        const b = band(v.finalScore);
+        const short = b === 'green' ? 'g' : b === 'amber' ? 'a' : 'r';
+        body.innerHTML += `
+          <tr>
+            <td>
+              <div class="vendor-cell">
+                <div class="accent ${short}"></div>
+                <div>
+                  <div class="vendor-name">${v.name}</div>
+                  <div class="vendor-meta">${v.id} • ${v.primaryContact}</div>
+                </div>
+              </div>
+            </td>
+            <td>${v.firstTimeFix}%</td>
+            <td>${v.sameDayFixes}%</td>
+            <td>${v.requestResolution}%</td>
+            <td>${v.pmAdherence}%</td>
+            <td>
+              <div class="score-cell">
+                <div class="progress"><span style="width:${v.finalScore}%; background:${barColor(v.finalScore)}"></span></div>
+                <strong>${v.finalScore}%</strong>
+                <span class="badge ${b}">${v.risk}</span>
+              </div>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function ensurePPMTooltip() {
+      let tooltip = document.getElementById('ppmTooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'ppmTooltip';
+        tooltip.className = 'ppm-tooltip';
+        document.body.appendChild(tooltip);
+      }
+      return tooltip;
+    }
+
+    function showPPMTooltip(e, vendor) {
+      const tooltip = ensurePPMTooltip();
+      tooltip.innerHTML = `
+        <div class="tt-title">${vendor.name}</div>
+        <div class="tt-body">PM Adherence: ${vendor.pmAdherence}%<br>Risk: ${vendor.risk}<br>Insurance: ${vendor.insuranceUploaded}</div>`;
+      tooltip.style.left = `${e.clientX + 14}px`;
+      tooltip.style.top = `${e.clientY + 14}px`;
+      tooltip.classList.add('show');
+    }
+
+    function movePPMTooltip(e) {
+      const tooltip = ensurePPMTooltip();
+      tooltip.style.left = `${e.clientX + 14}px`;
+      tooltip.style.top = `${e.clientY + 14}px`;
+    }
+
+    function hidePPMTooltip() {
+      const tooltip = ensurePPMTooltip();
+      tooltip.classList.remove('show');
+    }
+
+    function renderPPM(data) {
+      const ppm = document.getElementById('ppmList');
+      ppm.innerHTML = '';
+      [...data].sort((a, b) => b.pmAdherence - a.pmAdherence).forEach(v => {
+        const row = document.createElement('div');
+        row.className = 'mini-row';
+        row.innerHTML = `
+          <div>
+            <div class="mini-name">${v.name}</div>
+            <div class="mini-bar"><span style="width:${v.pmAdherence}%"></span></div>
+          </div>
+          <div class="mini-value">${v.pmAdherence}%</div>`;
+        row.addEventListener('mouseenter', (e) => showPPMTooltip(e, v));
+        row.addEventListener('mousemove', movePPMTooltip);
+        row.addEventListener('mouseleave', hidePPMTooltip);
+        ppm.appendChild(row);
+      });
+    }
+
+    function renderActions(data) {
+      const el = document.getElementById('actionList');
+      el.innerHTML = '';
+      [...data].sort((a, b) => a.finalScore - b.finalScore).slice(0, 3).forEach(v => {
+        const b = band(v.finalScore);
+        el.innerHTML += `
+          <div class="action-item">
+            <div class="action-head">
+              <div class="action-name">${v.name}</div>
+              <span class="badge ${b}">${v.risk}</span>
+            </div>
+            <div class="action-text">${v.action}</div>
+          </div>`;
+      });
+    }
+
+    function destroyCharts() {
+      chartRefs.forEach(c => c.destroy());
+      chartRefs = [];
+    }
+
+    function renderCharts(data) {
+      destroyCharts();
+      const sorted = [...data].sort((a, b) => b.finalScore - a.finalScore);
+      const labels = sorted.map(v => v.name);
+
+      chartRefs.push(new Chart(document.getElementById('benchmarkChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Final Score',
+              data: sorted.map(v => v.finalScore),
+              backgroundColor: sorted.map(v => v.finalScore < 60 ? '#9f1239' : v.finalScore < 80 ? '#fcd34d' : '#34d399'),
+              borderColor: sorted.map(v => v.finalScore < 60 ? '#9f1239' : v.finalScore < 80 ? '#f59e0b' : '#10b981'),
+              borderWidth: 1,
+              borderRadius: 8,
+              barThickness: 18
+            },
+            {
+              type: 'line',
+              label: 'Target',
+              data: sorted.map(() => 80),
+              borderColor: '#887cf7',
+              borderDash: [6, 6],
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 18, color: '#475467', font: { family: 'Inter', size: 12 } } },
+            tooltip: {
+              ...baseTooltip(sorted),
+              callbacks: {
+                title(items) {
+                  return sorted[items[0].dataIndex].name;
+                },
+                label(context) {
+                  if (context.dataset.label === 'Target') return 'Target threshold: 80%';
+                  return `Final Score: ${context.formattedValue}%`;
+                },
+                afterBody(items) {
+                  const item = sorted[items[0].dataIndex];
+                  return [
+                    `Risk: ${item.risk}`,
+                    `Insurance: ${item.insuranceUploaded}`,
+                    `Category: ${item.category}`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { beginAtZero: true, max: 100, grid: { color: '#eef2f7' }, ticks: { color: '#667085', stepSize: 20 } },
+            y: { grid: { display: false }, ticks: { color: '#475467' } }
+          }
+        }
+      }));
+
+      const healthy = data.filter(v => v.finalScore >= 80).length;
+      const watchlist = data.filter(v => v.finalScore >= 60 && v.finalScore < 80).length;
+      const risk = data.filter(v => v.finalScore < 60).length;
+      const total = data.length || 1;
+
+      chartRefs.push(new Chart(document.getElementById('distributionChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Healthy', 'Watchlist', 'High Risk'],
+          datasets: [{ data: [healthy, watchlist, risk], backgroundColor: ['#34d399', '#fbbf24', '#9f1239'], borderColor: '#ffffff', borderWidth: 4, hoverOffset: 4 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            centerTextPlugin: { text: `${Math.round((healthy / total) * 100)}%`, subtext: 'healthy' },
+            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 16, color: '#475467', font: { family: 'Inter', size: 12 } } },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#344054',
+              bodyColor: '#475467',
+              borderColor: '#e5ecf5',
+              borderWidth: 1,
+              padding: 12,
+              titleFont: { family: 'Inter', weight: '700', size: 12 },
+              bodyFont: { family: 'Inter', size: 12 },
+              callbacks: {
+                label(context) {
+                  const value = context.raw;
+                  const pct = Math.round((value / total) * 100);
+                  return `${context.label}: ${value} vendors (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      }));
+
+      const grouped = {};
+      data.forEach(v => { grouped[v.category] = (grouped[v.category] || 0) + v.contractCost; });
+      chartRefs.push(new Chart(document.getElementById('contractChart'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(grouped),
+          datasets: [{
+            data: Object.values(grouped),
+            backgroundColor: ['#8b83f6','#3b82f6','#34d399','#fbbf24','#9f1239','#94a3b8'],
+            borderColor: '#ffffff',
+            borderWidth: 4,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 16, color: '#475467', font: { family: 'Inter', size: 11 } } },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#344054',
+              bodyColor: '#475467',
+              borderColor: '#e5ecf5',
+              borderWidth: 1,
+              padding: 12,
+              titleFont: { family: 'Inter', weight: '700', size: 12 },
+              bodyFont: { family: 'Inter', size: 12 },
+              callbacks: {
+                label(context) {
+                  const value = context.raw;
+                  return `${context.label}: $${Number(value).toLocaleString()}`;
+                }
+              }
+            }
+          }
+        }
+      }));
+    }
+
+    function refresh() {
+      const data = getFiltered();
+      renderKPIs(data);
+      renderTable(data);
+      renderPPM(data);
+      renderActions(data);
+      renderCharts(data);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', refresh);
+    document.getElementById('riskFilter').addEventListener('change', refresh);
+    refresh();
+  </script>
+</body>
+</html>
