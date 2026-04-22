@@ -17,7 +17,6 @@
       --red: #9f1239;
       --purple: #6366f1;
       --blue: #3b82f6;
-      --shadow: none;
       --font: Inter, Arial, Helvetica, sans-serif;
     }
 
@@ -40,44 +39,6 @@
       padding: 16px 16px 32px;
     }
 
-    .dashboard-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .dashboard-title h1 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #334155;
-    }
-
-    .dashboard-title p {
-      margin: 2px 0 0;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .toolbar input,
-    .toolbar select {
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 4px;
-      padding: 7px 10px;
-      font-size: 12px;
-      color: #374151;
-      min-width: 180px;
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -88,7 +49,6 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 4px;
-      box-shadow: var(--shadow);
       overflow: hidden;
     }
 
@@ -119,7 +79,107 @@
       margin-top: 3px;
     }
 
-    .card-body { padding: 10px; }
+    .card-body {
+      padding: 10px;
+    }
+
+    .dashboard-title-standalone {
+      margin-bottom: 10px;
+    }
+
+    .dashboard-title-standalone h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.2;
+    }
+
+    .narrative-card {
+      position: relative;
+    }
+
+    .narrative-card::before {
+      content: "";
+      display: block;
+      height: 2px;
+      background: var(--blue);
+    }
+
+    .narrative-header {
+      margin-bottom: 10px;
+    }
+
+    .narrative-desc {
+      font-size: 11px;
+      color: #667085;
+      line-height: 1.5;
+      max-width: 860px;
+    }
+
+    .info-chips {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .info-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 14px;
+      border-radius: 18px;
+      border: 1px solid #d7dde5;
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .chip-healthy {
+      background: #eefbf3;
+      border-color: #bfe7cc;
+      color: #2f855a;
+    }
+
+    .chip-watch {
+      background: #fff8ee;
+      border-color: #f3d6a5;
+      color: #b7791f;
+    }
+
+    .chip-risk {
+      background: #fff4f7;
+      border-color: #f0c7d3;
+      color: #b4234d;
+    }
+
+    .chip-weight {
+      background: #f4f6f8;
+      border-color: #d8dee6;
+      color: #667085;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: 12px;
+      color: #374151;
+      min-width: 180px;
+    }
 
     .kpi-card {
       min-height: 76px;
@@ -129,7 +189,9 @@
     .kpi-card::before {
       content: "";
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 2px;
       background: var(--purple);
     }
@@ -381,7 +443,6 @@
       color: #475467;
       border: 1px solid var(--border);
       border-radius: 4px;
-      box-shadow: none;
       padding: 8px 10px;
       min-width: 180px;
       opacity: 0;
@@ -423,12 +484,28 @@
 <body>
 <div class="page">
 
-  <div class="dashboard-title">
-    <div>
-      <h1>Vendor Scoring Dashboard</h1>
-      <p>Operational analytics view for vendor performance, risk, compliance, and contract exposure.</p>
-    </div>
+  <div class="dashboard-title-standalone">
+    <h1>Vendor Scoring Dashboard</h1>
   </div>
+
+  <section class="grid" style="margin-bottom:16px;">
+    <div class="card span-12 narrative-card">
+      <div class="card-body">
+        <div class="narrative-header">
+          <div class="narrative-desc">
+            Executive-to-operations view for vendor governance, designed around scorecarding. It highlights vendor quality, service reliability and compliance readiness.
+          </div>
+        </div>
+
+        <div class="info-chips">
+          <span class="info-chip chip-healthy">Healthy 80–100</span>
+          <span class="info-chip chip-watch">Watchlist 60–79</span>
+          <span class="info-chip chip-risk">Risk below 60</span>
+          <span class="info-chip chip-weight">Weights: Same-Day 40% • Resolution 35% • PM Adherence 25%</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="grid" style="margin-bottom:16px;">
     <div class="card span-3">
@@ -498,7 +575,7 @@
           <div class="card-sub">Detailed KPI view with weighted scoring by vendor.</div>
         </div>
         <div class="toolbar">
-          <input id="searchInput" type="text" placeholder="Search vendor / contact / email">
+          <input id="searchInput" type="text" placeholder="Search vendor / contact / email" />
           <select id="riskFilter">
             <option value="all">All Risk Levels</option>
             <option value="Low">Low Risk</option>
