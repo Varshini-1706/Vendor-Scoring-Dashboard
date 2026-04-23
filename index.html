@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendor Scoring Dashboard</title>
+  <title>Vendor Performance</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -49,7 +49,8 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 4px;
-      overflow: hidden;
+      overflow: visible;
+      position: relative;
     }
 
     .span-12 { grid-column: span 12; }
@@ -64,6 +65,8 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
+      position: relative;
+      z-index: 1;
     }
 
     .card-title {
@@ -93,6 +96,93 @@
       font-weight: 600;
       color: #334155;
       line-height: 1.2;
+    }
+
+    .info-icon {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      cursor: help;
+      flex-shrink: 0;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .info-icon:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #334155;
+    }
+
+    .info-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: -100px;
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 9px;
+      font-weight: 400;
+      line-height: 1.4;
+      white-space: normal;
+      width: 220px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+      z-index: 10000;
+      font-family: var(--font);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-tooltip strong {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+      color: #1f2937;
+      font-size: 10px;
+    }
+
+    .info-icon:hover .info-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .info-tooltip::before {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      right: 125px;
+      border: 4px solid transparent;
+      border-top-color: #e5e7eb;
+      z-index: 10001;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-family: var(--font);
+      color: #475569;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
     .narrative-card {
@@ -177,8 +267,21 @@
       border-radius: 4px;
       padding: 7px 10px;
       font-size: 12px;
+      font-family: var(--font);
       color: #374151;
       min-width: 180px;
+    }
+
+    .toolbar input:hover,
+    .toolbar select:hover {
+      border-color: #9ca3af;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .kpi-card {
@@ -384,57 +487,6 @@
       line-height: 1.4;
     }
 
-    .summary-kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .summary-kpi {
-      position: relative;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px 14px 12px;
-      min-height: 110px;
-    }
-
-    .summary-kpi::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      border-top-left-radius: 6px;
-      border-top-right-radius: 6px;
-      background: #94a3b8;
-    }
-
-    .summary-kpi.preferred::before { background: var(--green); }
-    .summary-kpi.watchlist::before { background: var(--amber); }
-    .summary-kpi.compliance::before { background: var(--red); }
-
-    .summary-kpi-label {
-      font-size: 10px;
-      color: #64748b;
-      margin-bottom: 10px;
-    }
-
-    .summary-kpi-value {
-      font-size: 28px;
-      font-weight: 600;
-      line-height: 1;
-      color: #1f2937;
-    }
-
-    .summary-kpi-foot {
-      margin-top: 8px;
-      font-size: 10px;
-      color: #6b7280;
-      line-height: 1.35;
-    }
-
     .ppm-tooltip {
       position: fixed;
       pointer-events: none;
@@ -485,27 +537,8 @@
 <div class="page">
 
   <div class="dashboard-title-standalone">
-    <h1>Vendor Scoring Dashboard</h1>
+    <h1>Vendor Performance</h1>
   </div>
-
-  <section class="grid" style="margin-bottom:16px;">
-    <div class="card span-12 narrative-card">
-      <div class="card-body">
-        <div class="narrative-header">
-          <div class="narrative-desc">
-            Executive-to-operations view for vendor governance, designed around scorecarding. It highlights vendor quality, service reliability and compliance readiness.
-          </div>
-        </div>
-
-        <div class="info-chips">
-          <span class="info-chip chip-healthy">Healthy 80–100</span>
-          <span class="info-chip chip-watch">Watchlist 60–79</span>
-          <span class="info-chip chip-risk">Risk below 60</span>
-          <span class="info-chip chip-weight">Weights: Same-Day 40% • Resolution 35% • PM Adherence 25%</span>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section class="grid" style="margin-bottom:16px;">
     <div class="card span-3">
@@ -526,9 +559,9 @@
 
     <div class="card span-3">
       <div class="card-body kpi-card amber">
-        <div class="kpi-label">High Risk Vendors</div>
+        <div class="kpi-label">Vendors At Risk</div>
         <div class="kpi-value" id="kpiRisk">2</div>
-        <div class="kpi-foot">Vendors requiring immediate action and review.</div>
+        <div class="kpi-foot">Vendors below 60% threshold requiring urgent attention.</div>
       </div>
     </div>
 
@@ -546,7 +579,11 @@
       <div class="card-header">
         <div>
           <div class="card-title">Vendor Score Ranking</div>
-          <div class="card-sub">Vendors ranked by final score against the operating threshold.</div>
+          <div class="card-sub">Vendors ranked by final score against the 80-point performance threshold.</div>
+        </div>
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>Vendor Score Ranking</strong><br>Performance scores ranked against 80% threshold.<br><br>🟢 Preferred (80-100)<br>🟡 Standard (60-79)<br>🔴 Critical (<60)</div>
         </div>
       </div>
       <div class="card-body">
@@ -557,8 +594,12 @@
     <div class="card span-4 short">
       <div class="card-header">
         <div>
-          <div class="card-title">Portfolio Quality Split</div>
-          <div class="card-sub">Distribution of vendors across healthy, watchlist, and risk bands.</div>
+          <div class="card-title">Performance Distribution</div>
+          <div class="card-sub">Vendor tiers by performance rating.</div>
+        </div>
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>Distribution</strong><br>Portfolio breakdown across performance tiers.<br><br>🟢 Preferred: Recommended<br>🟡 Standard: Monitor<br>🔴 Critical: Intervention needed</div>
         </div>
       </div>
       <div class="card-body">
@@ -570,20 +611,37 @@
   <section class="grid" style="margin-bottom:16px;">
     <div class="card span-12">
       <div class="card-header">
-        <div>
-          <div class="card-title">Vendor Scorecard</div>
-          <div class="card-sub">Detailed KPI view with weighted scoring by vendor.</div>
-        </div>
-        <div class="toolbar">
-          <input id="searchInput" type="text" placeholder="Search vendor / contact / email" />
-          <select id="riskFilter">
-            <option value="all">All Risk Levels</option>
-            <option value="Low">Low Risk</option>
-            <option value="Medium">Medium Risk</option>
-            <option value="High">High Risk</option>
-          </select>
-        </div>
+  <div>
+    <div class="card-title">Vendor Scorecard</div>
+    <div class="card-sub">Detailed performance metrics with weighted scoring by vendor.</div>
+  </div>
+
+  <div class="toolbar">
+    <input id="searchInput" type="text" placeholder="Search vendor / contact / email" />
+
+    <select id="riskFilter">
+      <option value="all">All Performance Tiers</option>
+      <option value="Low">Preferred</option>
+      <option value="Medium">Standard</option>
+      <option value="High">Critical</option>
+    </select>
+
+    <!-- FINAL POSITION (RIGHT AFTER DROPDOWN) -->
+    <div class="info-icon">
+      i
+      <div class="info-tooltip">
+        <strong>Scorecard</strong><br>
+        Performance metrics by vendor.<br><br>
+        • First Time Fix %<br>
+        • Same Day Completion %<br>
+        • Resolution %<br>
+        • PM Adherence %<br>
+        • Final Score (weighted)<br><br>
+        Colors: 🟢 Preferred | 🟡 Standard | 🔴 Critical
       </div>
+    </div>
+  </div>
+</div>
       <div class="card-body table-wrap">
         <table>
           <thead>
@@ -607,7 +665,11 @@
       <div class="card-header">
         <div>
           <div class="card-title">PM Adherence Ranking</div>
-          <div class="card-sub">Preventive maintenance completion ranking by vendor.</div>
+          <div class="card-sub">Preventive maintenance completion by vendor.</div>
+        </div>
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>PM Adherence</strong><br>Preventive maintenance compliance ranking.<br><br>80%+: Proactive<br>60-79%: Adequate<br>Below 60%: Reactive</div>
         </div>
       </div>
       <div class="card-body">
@@ -618,8 +680,12 @@
     <div class="card span-4 short">
       <div class="card-header">
         <div>
-          <div class="card-title">Contract Exposure Mix</div>
-          <div class="card-sub">Contract concentration by active service category.</div>
+          <div class="card-title">Service Category Mix</div>
+          <div class="card-sub">Contract distribution across service areas.</div>
+        </div>
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>Category Mix</strong><br>Contract value distribution by service category.<br><br>Shows spend concentration and vendor dependency risk across service areas.</div>
         </div>
       </div>
       <div class="card-body">
@@ -631,7 +697,11 @@
       <div class="card-header">
         <div>
           <div class="card-title">Priority Actions</div>
-          <div class="card-sub">Recommended next steps for underperforming vendors.</div>
+          <div class="card-sub">Recommended next steps for vendors needing improvement.</div>
+        </div>
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>Actions</strong><br>Remediation steps prioritized by performance score (lowest first).<br><br>🔴 Critical: Immediate<br>🟡 Standard: Monitor<br>🟢 Preferred: Benchmark</div>
         </div>
       </div>
       <div class="card-body">
@@ -640,37 +710,7 @@
     </div>
   </section>
 
-  <section class="grid">
-    <div class="card span-12">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Portfolio Summary</div>
-          <div class="card-sub">High-level vendor performance and compliance summary.</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="summary-kpi-grid">
-          <div class="summary-kpi preferred">
-            <div class="summary-kpi-label">Preferred Vendors</div>
-            <div class="summary-kpi-value" id="preferredCount">2</div>
-            <div class="summary-kpi-foot">Best-performing vendors suitable for priority accounts.</div>
-          </div>
 
-          <div class="summary-kpi watchlist">
-            <div class="summary-kpi-label">Watchlist Vendors</div>
-            <div class="summary-kpi-value" id="watchCount">2</div>
-            <div class="summary-kpi-foot">Mid-tier vendors requiring regular review.</div>
-          </div>
-
-          <div class="summary-kpi compliance">
-            <div class="summary-kpi-label">Compliance Gaps</div>
-            <div class="summary-kpi-value" id="gapCount">3</div>
-            <div class="summary-kpi-foot">Vendors with missing insurance documentation.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
 </div>
 
@@ -708,6 +748,18 @@
 
   Chart.register(centerTextPlugin);
 
+  function getPerformanceTier(score) {
+    if (score >= 80) return 'Preferred';
+    if (score >= 60) return 'Standard';
+    return 'Critical';
+  }
+
+  function getPerformanceTierFromRisk(riskLevel) {
+    if (riskLevel === 'Low') return 'Preferred';
+    if (riskLevel === 'Medium') return 'Standard';
+    return 'Critical';
+  }
+
   function band(score) {
     if (score >= 80) return 'green';
     if (score >= 60) return 'amber';
@@ -736,11 +788,8 @@
   function renderKPIs(data) {
     document.getElementById('kpiVendors').textContent = data.length;
     document.getElementById('kpiAvg').textContent = average(data, 'finalScore') + '%';
-    document.getElementById('kpiRisk').textContent = data.filter(v => v.risk === 'High').length;
+    document.getElementById('kpiRisk').textContent = data.filter(v => v.finalScore < 60).length;
     document.getElementById('kpiInsurance').textContent = `${data.filter(v => v.insuranceUploaded === 'Yes').length}/${data.length}`;
-    document.getElementById('preferredCount').textContent = data.filter(v => v.finalScore >= 85).length;
-    document.getElementById('watchCount').textContent = data.filter(v => v.risk === 'Medium').length;
-    document.getElementById('gapCount').textContent = data.filter(v => v.insuranceUploaded === 'No').length;
   }
 
   function renderTable(data) {
@@ -749,6 +798,7 @@
     data.forEach(v => {
       const b = band(v.finalScore);
       const short = b === 'green' ? 'g' : b === 'amber' ? 'a' : 'r';
+      const tier = getPerformanceTier(v.finalScore);
       body.innerHTML += `
         <tr>
           <td>
@@ -768,7 +818,7 @@
             <div class="score-cell">
               <div class="progress"><span style="width:${v.finalScore}%; background:${barColor(v.finalScore)}"></span></div>
               <strong>${v.finalScore}%</strong>
-              <span class="badge ${b}">${v.risk}</span>
+              <span class="badge ${b}">${tier}</span>
             </div>
           </td>
         </tr>`;
@@ -788,7 +838,8 @@
 
   function showPPMTooltip(e, vendor) {
     const tooltip = ensurePPMTooltip();
-    tooltip.innerHTML = `<div class="tt-title">${vendor.name}</div><div class="tt-body">PM Adherence: ${vendor.pmAdherence}%<br>Risk: ${vendor.risk}<br>Insurance: ${vendor.insuranceUploaded}</div>`;
+    const tier = getPerformanceTierFromRisk(vendor.risk);
+    tooltip.innerHTML = `<div class="tt-title" style="font-family: var(--font);">${vendor.name}</div><div class="tt-body" style="font-family: var(--font);">PM Adherence: ${vendor.pmAdherence}%<br>Performance Tier: ${tier}<br>Insurance: ${vendor.insuranceUploaded}</div>`;
     tooltip.style.left = `${e.clientX + 12}px`;
     tooltip.style.top = `${e.clientY + 12}px`;
     tooltip.classList.add('show');
@@ -810,7 +861,7 @@
     [...data].sort((a, b) => b.pmAdherence - a.pmAdherence).forEach(v => {
       const row = document.createElement('div');
       row.className = 'mini-row';
-      row.innerHTML = `<div><div class="mini-name">${v.name}</div><div class="mini-bar"><span style="width:${v.pmAdherence}%"></span></div></div><div class="mini-value">${v.pmAdherence}%</div>`;
+      row.innerHTML = `<div><div class="mini-name" style="font-family: var(--font);">${v.name}</div><div class="mini-bar"><span style="width:${v.pmAdherence}%"></span></div></div><div class="mini-value" style="font-family: var(--font);">${v.pmAdherence}%</div>`;
       row.addEventListener('mouseenter', (e) => showPPMTooltip(e, v));
       row.addEventListener('mousemove', movePPMTooltip);
       row.addEventListener('mouseleave', hidePPMTooltip);
@@ -823,7 +874,8 @@
     el.innerHTML = '';
     [...data].sort((a, b) => a.finalScore - b.finalScore).slice(0, 3).forEach(v => {
       const b = band(v.finalScore);
-      el.innerHTML += `<div class="action-item"><div class="action-head"><div class="action-name">${v.name}</div><span class="badge ${b}">${v.risk}</span></div><div class="action-text">${v.action}</div></div>`;
+      const tier = getPerformanceTier(v.finalScore);
+      el.innerHTML += `<div class="action-item"><div class="action-head"><div class="action-name" style="font-family: var(--font);">${v.name}</div><span class="badge ${b}" style="font-family: var(--font);">${tier}</span></div><div class="action-text" style="font-family: var(--font);">${v.action}</div></div>`;
     });
   }
 
@@ -894,7 +946,8 @@
               label(context) { return context.dataset.label === 'Target' ? 'Target: 80%' : `Final Score: ${context.formattedValue}%`; },
               afterBody(items) {
                 const item = sorted[items[0].dataIndex];
-                return [`Risk: ${item.risk}`, `Insurance: ${item.insuranceUploaded}`, `Category: ${item.category}`];
+                const tier = getPerformanceTier(item.finalScore);
+                return [`Performance Tier: ${tier}`, `Insurance: ${item.insuranceUploaded}`, `Category: ${item.category}`];
               }
             }
           }
@@ -914,17 +967,17 @@
       }
     }));
 
-    const healthy = data.filter(v => v.finalScore >= 80).length;
-    const watchlist = data.filter(v => v.finalScore >= 60 && v.finalScore < 80).length;
-    const risk = data.filter(v => v.finalScore < 60).length;
+    const preferred = data.filter(v => v.finalScore >= 80).length;
+    const standard = data.filter(v => v.finalScore >= 60 && v.finalScore < 80).length;
+    const critical = data.filter(v => v.finalScore < 60).length;
     const total = data.length || 1;
 
     chartRefs.push(new Chart(document.getElementById('distributionChart'), {
       type: 'doughnut',
       data: {
-        labels: ['Healthy', 'Watchlist', 'Risk'],
+        labels: ['Preferred', 'Standard', 'Critical'],
         datasets: [{
-          data: [healthy, watchlist, risk],
+          data: [preferred, standard, critical],
           backgroundColor: ['#22c55e', '#f59e0b', '#9f1239'],
           borderColor: '#ffffff',
           borderWidth: 3
@@ -935,7 +988,7 @@
         maintainAspectRatio: false,
         cutout: '70%',
         plugins: {
-          centerTextPlugin: { text: `${Math.round((healthy / total) * 100)}%`, subtext: 'healthy' },
+          centerTextPlugin: { text: `${Math.round((preferred / total) * 100)}%`, subtext: 'preferred' },
           legend: {
             position: 'bottom',
             labels: {
@@ -983,7 +1036,7 @@
               usePointStyle: true,
               boxWidth: 8,
               padding: 12,
-              font: { family: 'Inter', size: 10, weight: '500' }
+              font: { family: 'Inter', size: 10 }
             }
           },
           tooltip: {
