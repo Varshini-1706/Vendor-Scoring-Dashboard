@@ -554,8 +554,7 @@
         background: white;
       }
 
-      .report-btn,
-      #generateReportBtn {
+      .report-btn {
         display: none !important;
       }
 
@@ -565,11 +564,6 @@
 
       .card {
         break-inside: avoid;
-        page-break-inside: avoid;
-      }
-
-      .info-tooltip {
-        display: none !important;
       }
     }
   </style>
@@ -581,17 +575,6 @@
     <div class="topbar-left">
       <h1>Vendor Performance Scorecard</h1>
       <p>Overview of vendor service quality, preventive maintenance adherence, request completion, and operational performance.</p>
-    </div>
-
-    <div class="topbar-right">
-      <button id="generateReportBtn" class="report-btn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3v12"></path>
-          <path d="M7 10l5 5 5-5"></path>
-          <path d="M5 21h14"></path>
-        </svg>
-        Generate Report
-      </button>
     </div>
   </div>
 
@@ -1131,72 +1114,87 @@
   }
 
   function downloadReport() {
-    const printWindow = window.open('', '_blank', 'width=1440,height=900');
-    if (!printWindow) return;
+    const visibleData = getFiltered();
+    const avgScore = average(visibleData, 'finalScore');
+    const riskCount = visibleData.filter(v => v.finalScore < 60).length;
+    const insuranceCount = visibleData.filter(v => v.insuranceUploaded === 'Yes').length;
 
-    const pageHtml = document.documentElement.outerHTML;
+    const rows = visibleData.map(v => `
+      <tr>
+        <td>${v.name}</td>
+        <td>${v.primaryContact}</td>
+        <td>${v.category}</td>
+        <td>${v.firstTimeFix}%</td>
+        <td>${v.sameDayFixes}%</td>
+        <td>${v.requestResolution}%</td>
+        <td>${v.pmAdherence}%</td>
+        <td>${v.finalScore}%</td>
+        <td>${getPerformanceTier(v.finalScore)}</td>
+      </tr>
+    `).join('');
 
-    printWindow.document.open();
-    printWindow.document.write(pageHtml);
-    printWindow.document.close();
+    const reportHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vendor Performance Scorecard Report</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 24px; color: #1f2937; }
+    h1 { margin: 0 0 6px; font-size: 24px; }
+    p { margin: 0 0 18px; color: #6b7280; }
+    .meta { margin-bottom: 20px; font-size: 14px; color: #475569; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .kpi { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
+    .kpi .label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+    .kpi .value { font-size: 24px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; }
+    th { background: #f8fafc; }
+  </style>
+</head>
+<body>
+  <h1>Vendor Performance Scorecard Report</h1>
+  <p>Generated from dashboard view</p>
+  <div class="meta">Generated on: ${new Date().toLocaleString()}</div>
 
-    printWindow.onload = function () {
-      const doc = printWindow.document;
+  <div class="kpis">
+    <div class="kpi"><div class="label">Active Vendors</div><div class="value">${visibleData.length}</div></div>
+    <div class="kpi"><div class="label">Average Score</div><div class="value">${avgScore}%</div></div>
+    <div class="kpi"><div class="label">Vendors At Risk</div><div class="value">${riskCount}</div></div>
+    <div class="kpi"><div class="label">Insurance Complete</div><div class="value">${insuranceCount}/${visibleData.length}</div></div>
+  </div>
 
-      const printNote = doc.createElement('div');
-      printNote.className = 'report-print-note';
-      printNote.style.display = 'none';
-      printNote.style.padding = '12px 14px 0';
-      printNote.style.fontSize = '12px';
-      printNote.style.color = '#64748b';
-      printNote.textContent = 'Vendor Performance Scorecard Report • Generated on ' + new Date().toLocaleString();
+  <table>
+    <thead>
+      <tr>
+        <th>Vendor</th>
+        <th>Primary Contact</th>
+        <th>Category</th>
+        <th>First Time Fix</th>
+        <th>Same Day Completion</th>
+        <th>Request Resolution</th>
+        <th>PM Adherence</th>
+        <th>Final Score</th>
+        <th>Tier</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>
+    `.trim();
 
-      const page = doc.querySelector('.page');
-      if (page) {
-        page.insertBefore(printNote, page.firstChild);
-      }
-
-      const extraStyle = doc.createElement('style');
-      extraStyle.innerHTML = `
-        @media print {
-          body {
-            background: white !important;
-          }
-
-          .report-print-note {
-            display: block !important;
-          }
-
-          #generateReportBtn,
-          .report-btn {
-            display: none !important;
-          }
-
-          .info-tooltip {
-            display: none !important;
-          }
-
-          .page {
-            padding: 10px !important;
-          }
-
-          .card {
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-          }
-
-          canvas {
-            max-width: 100% !important;
-          }
-        }
-      `;
-      doc.head.appendChild(extraStyle);
-
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 900);
-    };
+    const blob = new Blob([reportHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `vendor-performance-scorecard-report-${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function refresh() {
@@ -1210,7 +1208,11 @@
 
   document.getElementById('searchInput').addEventListener('input', refresh);
   document.getElementById('riskFilter').addEventListener('change', refresh);
-  document.getElementById('generateReportBtn').addEventListener('click', downloadReport);
+
+  const generateReportBtn = document.getElementById('generateReportBtn');
+  if (generateReportBtn) {
+    generateReportBtn.addEventListener('click', downloadReport);
+  }
 
   refresh();
 </script>
