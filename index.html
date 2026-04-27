@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #f3f4f6;
+      --bg: #f5f6f8;
       --panel: #ffffff;
       --border: #e5e7eb;
       --text: #1f2937;
@@ -17,7 +17,6 @@
       --red: #9f1239;
       --purple: #6366f1;
       --blue: #3b82f6;
-      --btn-red: #9b0017;
       --font: Inter, Arial, Helvetica, sans-serif;
     }
 
@@ -35,16 +34,15 @@
     }
 
     .page {
-      width: 100%;
-      max-width: none;
+      max-width: 1520px;
       margin: 0 auto;
-      padding: 14px 14px 28px;
+      padding: 16px 16px 32px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
+      gap: 16px;
     }
 
     .card {
@@ -61,77 +59,14 @@
     .span-4 { grid-column: span 4; }
     .span-3 { grid-column: span 3; }
 
-    .topbar {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 14px;
-      padding: 4px 2px 0;
-    }
-
-    .topbar-left h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #334155;
-      line-height: 1.25;
-    }
-
-    .topbar-left p {
-      margin: 4px 0 0;
-      font-size: 12px;
-      color: #64748b;
-      line-height: 1.45;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .report-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 38px;
-      padding: 0 14px;
-      border: none;
-      border-radius: 10px;
-      background: var(--btn-red);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-      transition: background 0.2s ease, transform 0.15s ease;
-    }
-
-    .report-btn:hover {
-      background: #7f0012;
-    }
-
-    .report-btn:active {
-      transform: translateY(1px);
-    }
-
-    .report-btn svg {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-    }
-
     .card-header {
-      padding: 10px 12px 0;
+      padding: 8px 10px 0;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       position: relative;
       z-index: 1;
-      flex-wrap: wrap;
     }
 
     .card-title {
@@ -148,7 +83,19 @@
     }
 
     .card-body {
-      padding: 10px 12px 12px;
+      padding: 10px;
+    }
+
+    .dashboard-title-standalone {
+      margin-bottom: 10px;
+    }
+
+    .dashboard-title-standalone h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.2;
     }
 
     .info-icon {
@@ -156,14 +103,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       border: 1px solid #cbd5e1;
       background: #ffffff;
       font-size: 11px;
       font-weight: 700;
-      color: #64748b;
+      color: #475569;
       cursor: help;
       flex-shrink: 0;
       user-select: none;
@@ -171,34 +118,32 @@
     }
 
     .info-icon:hover {
-      background: #f8fafc;
+      background: #f1f5f9;
       border-color: #94a3b8;
       color: #334155;
     }
 
     .info-tooltip {
       position: absolute;
-      top: 50%;
-      right: calc(100% + 10px);
-      transform: translateY(-50%);
+      bottom: calc(100% + 8px);
+      right: -100px;
       background: #ffffff;
       color: #374151;
       border: 1px solid #e5e7eb;
       border-radius: 4px;
-      padding: 9px 10px;
+      padding: 8px 10px;
       font-size: 9px;
       font-weight: 400;
-      line-height: 1.45;
+      line-height: 1.4;
       white-space: normal;
-      width: 230px;
+      width: 220px;
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
-      transition: all 0.2s ease;
+      pointer-events: auto;
+      transition: all 0.3s ease;
       z-index: 10000;
       font-family: var(--font);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-      text-align: left;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .info-tooltip strong {
@@ -214,35 +159,105 @@
       visibility: visible;
     }
 
-    .info-tooltip::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: -7px;
-      transform: translateY(-50%);
-      border-width: 6px 0 6px 7px;
-      border-style: solid;
-      border-color: transparent transparent transparent #e5e7eb;
-    }
-
     .info-tooltip::before {
       content: '';
       position: absolute;
-      top: 50%;
-      right: -6px;
-      transform: translateY(-50%);
-      border-width: 5px 0 5px 6px;
-      border-style: solid;
-      border-color: transparent transparent transparent #ffffff;
-      z-index: 2;
+      bottom: -5px;
+      right: 125px;
+      border: 4px solid transparent;
+      border-top-color: #e5e7eb;
+      z-index: 10001;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-family: var(--font);
+      color: #475569;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .narrative-card {
+      position: relative;
+    }
+
+    .narrative-card::before {
+      content: "";
+      display: block;
+      height: 2px;
+      background: var(--blue);
+    }
+
+    .narrative-header {
+      margin-bottom: 10px;
+    }
+
+    .narrative-desc {
+      font-size: 11px;
+      color: #667085;
+      line-height: 1.5;
+      max-width: 860px;
+    }
+
+    .info-chips {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .info-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 14px;
+      border-radius: 18px;
+      border: 1px solid #d7dde5;
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .chip-healthy {
+      background: #eefbf3;
+      border-color: #bfe7cc;
+      color: #2f855a;
+    }
+
+    .chip-watch {
+      background: #fff8ee;
+      border-color: #f3d6a5;
+      color: #b7791f;
+    }
+
+    .chip-risk {
+      background: #fff4f7;
+      border-color: #f0c7d3;
+      color: #b4234d;
+    }
+
+    .chip-weight {
+      background: #f4f6f8;
+      border-color: #d8dee6;
+      color: #667085;
     }
 
     .toolbar {
       display: flex;
       gap: 8px;
       align-items: center;
-      flex-wrap: nowrap;
-      margin-left: auto;
+      flex-wrap: wrap;
     }
 
     .toolbar input,
@@ -254,15 +269,7 @@
       font-size: 12px;
       font-family: var(--font);
       color: #374151;
-      height: 34px;
-    }
-
-    .toolbar input {
-      min-width: 210px;
-    }
-
-    .toolbar select {
-      min-width: 170px;
+      min-width: 180px;
     }
 
     .toolbar input:hover,
@@ -278,7 +285,7 @@
     }
 
     .kpi-card {
-      min-height: 80px;
+      min-height: 76px;
       position: relative;
     }
 
@@ -331,7 +338,7 @@
 
     th, td {
       text-align: left;
-      padding: 12px 10px;
+      padding: 10px 10px;
       border-bottom: 1px solid var(--border);
       font-size: 11px;
       vertical-align: middle;
@@ -347,7 +354,7 @@
 
     .accent {
       width: 4px;
-      height: 40px;
+      height: 30px;
       border-radius: 2px;
       flex: 0 0 auto;
     }
@@ -405,7 +412,7 @@
 
     .mini-list {
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .mini-row {
@@ -493,7 +500,6 @@
       opacity: 0;
       transform: translateY(4px);
       transition: opacity .12s ease, transform .12s ease;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
 
     .ppm-tooltip.show {
@@ -516,69 +522,25 @@
 
     canvas {
       width: 100% !important;
-      height: 230px !important;
+      height: 220px !important;
     }
 
-    .short canvas { height: 210px !important; }
+    .short canvas { height: 200px !important; }
 
     @media (max-width: 1200px) {
       .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; }
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .topbar-right {
-        justify-content: flex-start;
-      }
-      .toolbar {
-        width: 100%;
-        margin-left: 0;
-        flex-wrap: wrap;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .toolbar input,
-      .toolbar select {
-        min-width: 100%;
-        width: 100%;
-      }
-
-      .toolbar {
-        align-items: flex-start;
-      }
-    }
-
-    @media print {
-      body {
-        background: white;
-      }
-
-      .report-btn {
-        display: none !important;
-      }
-
-      .page {
-        padding: 0;
-      }
-
-      .card {
-        break-inside: avoid;
-      }
+      .summary-kpi-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>Vendor Performance</h1>
-      <p>Overview of vendor service quality, preventive maintenance adherence, request completion, and operational performance.</p>
-    </div>
+  <div class="dashboard-title-standalone">
+    <h1>Vendor Performance</h1>
   </div>
 
-  <section class="grid" style="margin-bottom:14px;">
+  <section class="grid" style="margin-bottom:16px;">
     <div class="card span-3">
       <div class="card-body kpi-card green">
         <div class="kpi-label">Active Vendors</div>
@@ -612,7 +574,7 @@
     </div>
   </section>
 
-  <section class="grid" style="margin-bottom:14px;">
+  <section class="grid" style="margin-bottom:16px;">
     <div class="card span-8">
       <div class="card-header">
         <div>
@@ -621,13 +583,7 @@
         </div>
         <div class="info-icon">
           i
-          <div class="info-tooltip">
-            <strong>Vendor Score Ranking</strong>
-            Performance scores ranked against 80% threshold.<br><br>
-            🟢 Preferred (80-100)<br>
-            🟡 Standard (60-79)<br>
-            🔴 Critical (&lt;60)
-          </div>
+          <div class="info-tooltip"><strong>Vendor Score Ranking</strong><br>Performance scores ranked against 80% threshold.<br><br>🟢 Preferred (80-100)<br>🟡 Standard (60-79)<br>🔴 Critical (<60)</div>
         </div>
       </div>
       <div class="card-body">
@@ -643,13 +599,7 @@
         </div>
         <div class="info-icon">
           i
-          <div class="info-tooltip">
-            <strong>Distribution</strong>
-            Portfolio breakdown across performance tiers.<br><br>
-            🟢 Preferred: Recommended<br>
-            🟡 Standard: Monitor<br>
-            🔴 Critical: Intervention needed
-          </div>
+          <div class="info-tooltip"><strong>Distribution</strong><br>Portfolio breakdown across performance tiers.<br><br>🟢 Preferred: Recommended<br>🟡 Standard: Monitor<br>🔴 Critical: Intervention needed</div>
         </div>
       </div>
       <div class="card-body">
@@ -658,14 +608,17 @@
     </div>
   </section>
 
-  <section class="grid" style="margin-bottom:14px;">
+  <section class="grid" style="margin-bottom:16px;">
     <div class="card span-12">
       <div class="card-header">
         <div>
           <div class="card-title">Vendor Scorecard</div>
           <div class="card-sub">Detailed performance metrics with weighted scoring by vendor.</div>
         </div>
-
+        <div class="info-icon">
+          i
+          <div class="info-tooltip"><strong>Scorecard</strong><br>Performance metrics by vendor.<br><br>• First Time Fix %<br>• Same Day Completion %<br>• Resolution %<br>• PM Adherence %<br>• Final Score (weighted)<br><br>Colors: 🟢 Preferred | 🟡 Standard | 🔴 Critical</div>
+        </div>
         <div class="toolbar">
           <input id="searchInput" type="text" placeholder="Search vendor / contact / email" />
           <select id="riskFilter">
@@ -674,23 +627,8 @@
             <option value="Medium">Standard</option>
             <option value="High">Critical</option>
           </select>
-
-          <div class="info-icon">
-            i
-            <div class="info-tooltip">
-              <strong>Scorecard</strong>
-              Performance metrics by vendor.<br><br>
-              • First Time Fix %<br>
-              • Same Day Completion %<br>
-              • Resolution %<br>
-              • PM Adherence %<br>
-              • Final Score (weighted)<br><br>
-              Colors: 🟢 Preferred | 🟡 Standard | 🔴 Critical
-            </div>
-          </div>
         </div>
       </div>
-
       <div class="card-body table-wrap">
         <table>
           <thead>
@@ -709,7 +647,7 @@
     </div>
   </section>
 
-  <section class="grid" style="margin-bottom:14px;">
+  <section class="grid" style="margin-bottom:16px;">
     <div class="card span-4">
       <div class="card-header">
         <div>
@@ -718,13 +656,7 @@
         </div>
         <div class="info-icon">
           i
-          <div class="info-tooltip">
-            <strong>PM Adherence</strong>
-            Preventive maintenance compliance ranking.<br><br>
-            80%+: Proactive<br>
-            60-79%: Adequate<br>
-            Below 60%: Reactive
-          </div>
+          <div class="info-tooltip"><strong>PM Adherence</strong><br>Preventive maintenance compliance ranking.<br><br>80%+: Proactive<br>60-79%: Adequate<br>Below 60%: Reactive</div>
         </div>
       </div>
       <div class="card-body">
@@ -740,11 +672,7 @@
         </div>
         <div class="info-icon">
           i
-          <div class="info-tooltip">
-            <strong>Category Mix</strong>
-            Contract value distribution by service category.<br><br>
-            Shows spend concentration and vendor dependency risk across service areas.
-          </div>
+          <div class="info-tooltip"><strong>Category Mix</strong><br>Contract value distribution by service category.<br><br>Shows spend concentration and vendor dependency risk across service areas.</div>
         </div>
       </div>
       <div class="card-body">
@@ -760,13 +688,7 @@
         </div>
         <div class="info-icon">
           i
-          <div class="info-tooltip">
-            <strong>Actions</strong>
-            Remediation steps prioritized by performance score.<br><br>
-            🔴 Critical: Immediate<br>
-            🟡 Standard: Monitor<br>
-            🟢 Preferred: Benchmark
-          </div>
+          <div class="info-tooltip"><strong>Actions</strong><br>Remediation steps prioritized by performance score (lowest first).<br><br>🔴 Critical: Immediate<br>🟡 Standard: Monitor<br>🟢 Preferred: Benchmark</div>
         </div>
       </div>
       <div class="card-body">
@@ -775,16 +697,18 @@
     </div>
   </section>
 
+
+
 </div>
 
 <script>
   const vendors = [
-    { id: '#109583', name: 'FSM Service Solutions', primaryContact: 'Mark', email: 'riyavarshini.arunprasad+fsmvend@facilio.com', insuranceUploaded: 'No', category: 'General Maintenance', firstTimeFix: 78, sameDayFixes: 81, requestResolution: 84, pmAdherence: 79, finalScore: 82, risk: 'Medium', contractCost: 125000, action: 'Close documentation gaps and tighten preventive maintenance follow-up.' },
-    { id: '#109582', name: 'Optimus Prime', primaryContact: 'PREM+FSM', email: 'premkumar+mtfsm@facilio.com', insuranceUploaded: 'No', category: 'Electrical Services', firstTimeFix: 72, sameDayFixes: 74, requestResolution: 78, pmAdherence: 71, finalScore: 76, risk: 'Medium', contractCost: 98000, action: 'Improve same-day completion through dispatch and response planning.' },
-    { id: '#109577', name: 'PrimeClean Facility Experts', primaryContact: 'Naveen s', email: 'naveen.s+vendor@moolya.com', insuranceUploaded: 'No', category: 'Cleaning Services', firstTimeFix: 82, sameDayFixes: 86, requestResolution: 87, pmAdherence: 80, finalScore: 85, risk: 'Low', contractCost: 146000, action: 'Use as a benchmark vendor for service quality and consistency.' },
+    { id: '#109583', name: 'FSM Service Solutions', primaryContact: 'Mark', email: 'riyavarshini.arunprasad+fsmvend@facilio.com', insuranceUploaded: 'No', category: 'General Maintenance', firstTimeFix: 78, sameDayFixes: 81, requestResolution: 84, pmAdherence: 79, finalScore: 80, risk: 'Medium', contractCost: 125000, action: 'Close documentation gaps and tighten preventive maintenance follow-up.' },
+    { id: '#109582', name: 'Optimus Prime', primaryContact: 'PREM+FSM', email: 'premkumar+mtfsm@facilio.com', insuranceUploaded: 'No', category: 'Electrical Services', firstTimeFix: 72, sameDayFixes: 74, requestResolution: 78, pmAdherence: 71, finalScore: 74, risk: 'Medium', contractCost: 98000, action: 'Improve same-day completion through dispatch and response planning.' },
+    { id: '#109577', name: 'PrimeClean Facility Experts', primaryContact: 'Naveen s', email: 'naveen.s+vendor@moolya.com', insuranceUploaded: 'No', category: 'Cleaning Services', firstTimeFix: 82, sameDayFixes: 86, requestResolution: 87, pmAdherence: 80, finalScore: 84, risk: 'Low', contractCost: 146000, action: 'Use as a benchmark vendor for service quality and consistency.' },
     { id: '#109576', name: 'Fix Cleaning Co', primaryContact: 'Fix Cleaning Co', email: 'akhila+fsmdemo@facilio.com', insuranceUploaded: 'Yes', category: 'Janitorial Services', firstTimeFix: 89, sameDayFixes: 92, requestResolution: 90, pmAdherence: 93, finalScore: 91, risk: 'Low', contractCost: 173000, action: 'Use as a preferred vendor for high-visibility and premium sites.' },
-    { id: '#109590', name: 'Summit Facility Partners', primaryContact: 'Daniel Brooks', email: 'daniel.brooks@summitfacilitypartners.com', insuranceUploaded: 'Yes', category: 'HVAC & Mechanical', firstTimeFix: 60, sameDayFixes: 66, requestResolution: 69, pmAdherence: 64, finalScore: 67, risk: 'High', contractCost: 118000, action: 'Initiate weekly performance governance and escalation tracking.' },
-    { id: '#109591', name: 'BluePeak Maintenance Group', primaryContact: 'Sarah Collins', email: 'sarah.collins@bluepeakmg.com', insuranceUploaded: 'Yes', category: 'Reactive Works', firstTimeFix: 52, sameDayFixes: 57, requestResolution: 61, pmAdherence: 56, finalScore: 58, risk: 'High', contractCost: 86000, action: 'Evaluate probation status or replacement for critical-service locations.' }
+    { id: '#109590', name: 'Summit Facility Partners', primaryContact: 'Daniel Brooks', email: 'daniel.brooks@summitfacilitypartners.com', insuranceUploaded: 'Yes', category: 'HVAC & Mechanical', firstTimeFix: 60, sameDayFixes: 66, requestResolution: 69, pmAdherence: 64, finalScore: 64, risk: 'High', contractCost: 118000, action: 'Initiate weekly performance governance and escalation tracking.' },
+    { id: '#109591', name: 'BluePeak Maintenance Group', primaryContact: 'Sarah Collins', email: 'sarah.collins@bluepeakmg.com', insuranceUploaded: 'Yes', category: 'Reactive Works', firstTimeFix: 52, sameDayFixes: 57, requestResolution: 61, pmAdherence: 56, finalScore: 56, risk: 'High', contractCost: 86000, action: 'Evaluate probation status or replacement for critical-service locations.' }
   ];
 
   let chartRefs = [];
@@ -903,15 +827,15 @@
     const tooltip = ensurePPMTooltip();
     const tier = getPerformanceTierFromRisk(vendor.risk);
     tooltip.innerHTML = `<div class="tt-title" style="font-family: var(--font);">${vendor.name}</div><div class="tt-body" style="font-family: var(--font);">PM Adherence: ${vendor.pmAdherence}%<br>Performance Tier: ${tier}<br>Insurance: ${vendor.insuranceUploaded}</div>`;
-    tooltip.style.left = `${Math.max(10, e.clientX - 210)}px`;
-    tooltip.style.top = `${Math.max(10, e.clientY + 12)}px`;
+    tooltip.style.left = `${e.clientX + 12}px`;
+    tooltip.style.top = `${e.clientY + 12}px`;
     tooltip.classList.add('show');
   }
 
   function movePPMTooltip(e) {
     const tooltip = ensurePPMTooltip();
-    tooltip.style.left = `${Math.max(10, e.clientX - 210)}px`;
-    tooltip.style.top = `${Math.max(10, e.clientY + 12)}px`;
+    tooltip.style.left = `${e.clientX + 12}px`;
+    tooltip.style.top = `${e.clientY + 12}px`;
   }
 
   function hidePPMTooltip() {
@@ -1113,90 +1037,6 @@
     }));
   }
 
-  function downloadReport() {
-    const visibleData = getFiltered();
-    const avgScore = average(visibleData, 'finalScore');
-    const riskCount = visibleData.filter(v => v.finalScore < 60).length;
-    const insuranceCount = visibleData.filter(v => v.insuranceUploaded === 'Yes').length;
-
-    const rows = visibleData.map(v => `
-      <tr>
-        <td>${v.name}</td>
-        <td>${v.primaryContact}</td>
-        <td>${v.category}</td>
-        <td>${v.firstTimeFix}%</td>
-        <td>${v.sameDayFixes}%</td>
-        <td>${v.requestResolution}%</td>
-        <td>${v.pmAdherence}%</td>
-        <td>${v.finalScore}%</td>
-        <td>${getPerformanceTier(v.finalScore)}</td>
-      </tr>
-    `).join('');
-
-    const reportHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Vendor Performance Scorecard Report</title>
-  <style>
-    body { font-family: Arial, Helvetica, sans-serif; margin: 24px; color: #1f2937; }
-    h1 { margin: 0 0 6px; font-size: 24px; }
-    p { margin: 0 0 18px; color: #6b7280; }
-    .meta { margin-bottom: 20px; font-size: 14px; color: #475569; }
-    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-    .kpi { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
-    .kpi .label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
-    .kpi .value { font-size: 24px; font-weight: 700; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; }
-    th { background: #f8fafc; }
-  </style>
-</head>
-<body>
-  <h1>Vendor Performance Scorecard Report</h1>
-  <p>Generated from dashboard view</p>
-  <div class="meta">Generated on: ${new Date().toLocaleString()}</div>
-
-  <div class="kpis">
-    <div class="kpi"><div class="label">Active Vendors</div><div class="value">${visibleData.length}</div></div>
-    <div class="kpi"><div class="label">Average Score</div><div class="value">${avgScore}%</div></div>
-    <div class="kpi"><div class="label">Vendors At Risk</div><div class="value">${riskCount}</div></div>
-    <div class="kpi"><div class="label">Insurance Complete</div><div class="value">${insuranceCount}/${visibleData.length}</div></div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Vendor</th>
-        <th>Primary Contact</th>
-        <th>Category</th>
-        <th>First Time Fix</th>
-        <th>Same Day Completion</th>
-        <th>Request Resolution</th>
-        <th>PM Adherence</th>
-        <th>Final Score</th>
-        <th>Tier</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
-</body>
-</html>
-    `.trim();
-
-    const blob = new Blob([reportHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const date = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = `vendor-performance-scorecard-report-${date}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
   function refresh() {
     const data = getFiltered();
     renderKPIs(data);
@@ -1208,12 +1048,6 @@
 
   document.getElementById('searchInput').addEventListener('input', refresh);
   document.getElementById('riskFilter').addEventListener('change', refresh);
-
-  const generateReportBtn = document.getElementById('generateReportBtn');
-  if (generateReportBtn) {
-    generateReportBtn.addEventListener('click', downloadReport);
-  }
-
   refresh();
 </script>
 </body>
